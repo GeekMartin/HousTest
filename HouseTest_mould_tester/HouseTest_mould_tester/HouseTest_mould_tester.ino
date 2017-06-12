@@ -15,7 +15,8 @@
 #include <avr/sleep.h>
 #include<avr/interrupt.h>
 
-LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);// Addr, En, Rw, Rs, d4, d5, d6, d7, backlighpin, polarity
+LiquidCrystal_I2C lcd(0x3F, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
+					// Addr, En, Rw, Rs, d4, d5, d6, d7, backlighpin, polarity
 RTC_DS1307 RTC;
 SdFat SD;
 File myFile;
@@ -24,24 +25,24 @@ Servo servo1;
 #define DS1307_I2C_ADDRESS 0x68 // the I2C address of Tiny RTC
 #define SD_CS_PIN SS
 
-const int volt_read_Pin = A0; //analog volt read pin
-const int buttonPin = 5; //main button input pin
-const int air_pump = 6; //air pump output pin
-const int blue_LED = 2; //main button LED pin
-const int power_LED = 9; //Power LED pin
-const int servoPin = 3; //Servomotor pin
+const int volt_read_Pin = A0; // analog volt read pin
+const int buttonPin = 5;      // main button input pin
+const int air_pump = 6;       // air pump output pin
+const int blue_LED = 2;       // main button LED pin
+const int power_LED = 9;      // Power LED pin
+const int servoPin = 3;       // Servomotor pin
 
-int resistor1 = 10000;//Variables for voltage divider R1
-int resistor2 = 2200; // R2
-float denominator;// voltage devider denominator
-int blue_LED_state = HIGH;
+int resistor1 = 10000;        // Variables for voltage divider R1
+int resistor2 = 2200;         // R2
+float denominator;            // voltage devider denominator
+int blue_LED_state = HIGH;    // Main button LED state
 
-int buttonState = 0; //main button state 
+int buttonState = 0;          // Main button state 
 int lastButtonState = 0;
-int eepromReadValue = 0;
-
 unsigned long previous_button_millis = 0;
 const long interval = 1000;
+int eepromReadValue = 0;
+
 
 
 boolean Inside_Test_1_address_eeprom;
@@ -57,7 +58,7 @@ boolean Outside_Test_2_status;
 void setup()
 {
 	Wire.begin();
-
+	attachInterrupt(21, digitalInterrupt, FALLING);
 	pinMode(air_pump, OUTPUT);
 	pinMode(buttonPin, INPUT);
 	pinMode(blue_LED, OUTPUT);
@@ -66,14 +67,14 @@ void setup()
 	pinMode(power_LED, OUTPUT);
 	digitalWrite(power_LED, HIGH);
 
-	//Convert resistor values to division value
+	//  Convert resistor values to division value
 	//  Equation is previously mentions voltage divider equation
 	//  R2 / (R1 + R2)
 	denominator = (float)resistor2 / (resistor1 + resistor2);
 	RTC.begin();
 	if (!RTC.isrunning()) {
 		Serial.println("RTC is NOT running!");
-		// following line sets the RTC to the date & time this sketch was compiled
+	// following line sets the RTC to the date & time this sketch was compiled
 		RTC.adjust(DateTime(__DATE__, __TIME__));
 	}
 	DateTime now = RTC.now();
@@ -532,37 +533,24 @@ void Mould_Test_Completed()
 		myFile.close();
 	}
 	delay(5000);
-	lcd.clear();
-	//lcd.noBacklight();
-	for (;;)
+
+	// Set all Digital IO LOW to save power
+	for (int i = 0; i < 20; i++) 
 	{
-		batterylevel(15, 0);
-		DateTime now = RTC.now();
-		lcd.setCursor(2, 0);
-		lcd.print("CURRENT TIME");
-		lcd.setCursor(4, 1);
-
-		if (now.hour()<10)
-		{
-			lcd.print('0');
-		}
-		lcd.print(now.hour());
-		lcd.print(':');
-
-		if (now.minute()<10)
-		{
-			lcd.print('0');
-		}
-		lcd.print(now.minute());
-		lcd.print(':');
-
-		if (now.second()<10)
-		{
-			lcd.print('0');
-		}
-		lcd.print(now.second());
-
+		if (i != 5) // leav digital pin 5 for wakeup
+		pinMode(i, OUTPUT);
 	}
+	//Disable ADC
+	ADCSRA &= ~(1 << 7); 
+	//Enabel Sleep mode
+	SMCR |= (1 << 2); //power down mode	
+	SMCR |= 1;		  //enable sleep mode
+	//BOD Disable
+	MCUCR |= (3 << 5);
+	MCUCR = (MCUCR & ~(1 << 5)) | (1 << 6);
+
+
+	
 }
 void batterylevel(int xpos, int ypos)
 {
@@ -742,5 +730,9 @@ void Turn_pump_on_and_countdown()
 		digitalWrite(air_pump, HIGH);
 		delay(1000);
 	}
+}
+void digitalInterrupt()
+{
+
 }
 
