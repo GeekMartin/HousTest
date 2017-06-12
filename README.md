@@ -1,4 +1,4 @@
 # HouseTest
 # http://housetest.dk/
-Houstest mould tester code
+Housetest mould tester code
 
