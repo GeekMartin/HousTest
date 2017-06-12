@@ -29,7 +29,7 @@ const int buttonPin = 5; //main button input pin
 const int air_pump = 6; //air pump output pin
 const int blue_LED = 2; //main button LED pin
 const int power_LED = 9; //Power LED pin
-const int servoPin = 3; //Servomotor pin
+const int servoPin = 3; //Servomotor pin // juhe otse pinist servosse !!!
 
 int resistor1 = 10000;//Variables for voltage divider R1
 int resistor2 = 2200; // R2
