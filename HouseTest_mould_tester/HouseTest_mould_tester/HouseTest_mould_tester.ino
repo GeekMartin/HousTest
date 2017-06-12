@@ -1,7 +1,8 @@
 /*
  Name:		HouseTest_mould_tester.ino
  Created:	6/12/2017 11:13:06 AM
- Author:	Martin
+ Author:	Martin Pihooja 
+ Company:   HouseTest ApS
 */
 
 #include <Servo.h>
