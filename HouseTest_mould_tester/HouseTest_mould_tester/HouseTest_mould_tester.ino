@@ -578,7 +578,7 @@ void batterylevel(int xpos, int ypos)
 	//  Divide by 1/5 = multiply by 5
 	voltage = voltage / denominator;
 
-	if (voltage > 14)
+	if (voltage > 13)
 	{
 		byte batlevel[10] = {
 			B01110,
@@ -594,7 +594,7 @@ void batterylevel(int xpos, int ypos)
 		lcd.setCursor(xpos, ypos);
 		lcd.write(byte(0));
 	}
-	if (voltage <= 14 && voltage > 11.3)
+	if (voltage <= 13 && voltage > 11.3)
 	{
 		byte batlevel[] = {
 			B01110,
