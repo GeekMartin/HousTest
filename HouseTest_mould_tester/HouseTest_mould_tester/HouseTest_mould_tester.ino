@@ -58,7 +58,7 @@ boolean Outside_Test_2_status;
 void setup()
 {
 	Wire.begin();
-	attachInterrupt(21, digitalInterrupt, FALLING);
+	attachInterrupt(0, digitalInterrupt, HIGH);
 	pinMode(air_pump, OUTPUT);
 	pinMode(buttonPin, INPUT);
 	pinMode(blue_LED, OUTPUT);
@@ -533,13 +533,14 @@ void Mould_Test_Completed()
 		myFile.close();
 	}
 	delay(5000);
-
+	lcd.clear();
 	// Set all Digital IO LOW to save power
 	for (int i = 0; i < 20; i++) 
 	{
 		if (i != 5) // leav digital pin 5 for wakeup
 		pinMode(i, OUTPUT);
 	}
+	lcd.noBacklight();
 	//Disable ADC
 	ADCSRA &= ~(1 << 7); 
 	//Enabel Sleep mode
@@ -548,7 +549,37 @@ void Mould_Test_Completed()
 	//BOD Disable
 	MCUCR |= (3 << 5);
 	MCUCR = (MCUCR & ~(1 << 5)) | (1 << 6);
+	__asm__  __volatile__("sleep");//in line assembler to go to sleep
 
+	for (;;)
+	{
+		lcd.backlight();
+		batterylevel(15, 0);
+		DateTime now = RTC.now();
+		lcd.setCursor(2, 0);
+		lcd.print("CURRENT TIME");
+		lcd.setCursor(4, 1);
+
+		if (now.hour()<10)
+		{
+			lcd.print('0');
+		}
+		lcd.print(now.hour());
+		lcd.print(':');
+
+		if (now.minute()<10)
+		{
+			lcd.print('0');
+		}
+		lcd.print(now.minute());
+		lcd.print(':');
+
+		if (now.second()<10)
+		{
+			lcd.print('0');
+		}
+		lcd.print(now.second());
+	}
 
 	
 }
@@ -702,7 +733,7 @@ void Turn_pump_on_and_countdown()
 	int secleft = 0;
 	digitalWrite(blue_LED_state, HIGH);
 
-	for (int counter = 10; counter > 0; counter--)
+	for (int counter = 2; counter > 0; counter--)
 	{
 
 		batterylevel(15, 0);
